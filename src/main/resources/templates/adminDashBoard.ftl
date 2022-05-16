@@ -1,13 +1,16 @@
+<#import "spring.ftl" as spring />
 <html>
 <head>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
-<style>
-	<#include "assets/library/DataTables/datatables.min.css">
-	<#include "assets/library/bootstrap/css/bootstrap.min.css">
-	<#include "assets/css/datatable.css">
-    <#include "assets/css/responsive.css">
-</style>
+<link href="<@spring.url 'assets/library/bootstrap/css/bootstrap.min.css' />"
+		  rel="stylesheet" >
+		  <link href="<@spring.url 'assets/library/DataTables/datatables.min.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/datatable.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/responsive.css' />"
+		  rel="stylesheet" >
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
@@ -51,10 +54,8 @@
 		<a href="logOut" class="btn btn-danger admin-btn">LogOut</a>
 </span>
 
-<script>
-		<#include "assets/js/jquery-3.6.0.min.js">
-		<#include "assets/library/DataTables/datatables.min.js">	
-		<#include "assets/js/datatable.js">
-</script>
+<script type="text/javascript" src="<@spring.url 'assets/js/jquery-3.6.0.min.js' />"></script>
+<script type="text/javascript" src="<@spring.url 'assets/library/DataTables/datatables.min.js' />"></script>
+<script type="text/javascript" src="<@spring.url 'assets/js/datatable.js' />"></script>
 </body>
 </html>

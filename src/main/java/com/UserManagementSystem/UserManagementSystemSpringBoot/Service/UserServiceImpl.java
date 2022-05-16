@@ -12,9 +12,14 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.*;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.Dao.*;
+import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.User;
+import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserAddress;
+import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserImage;
+import com.UserManagementSystem.UserManagementSystemSpringBoot.Dao.UserDao;
+import com.UserManagementSystem.UserManagementSystemSpringBoot.Dao.UserAddressDao;
+import com.UserManagementSystem.UserManagementSystemSpringBoot.Dao.UserImageDao;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass.EncryptPwd;
+
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -68,14 +73,13 @@ public class UserServiceImpl implements UserService{
 			LOG.info("User service,checkUser methods call");
 			User user = userdao.validUser(email);
 			List<UserImage> userimg = user.getPic();
-			List<UserImage> getimg= new ArrayList<UserImage>();
 			for(UserImage userimage : userimg)
 			{  	  
 		       	 String base64Image = Base64.getEncoder().encodeToString(userimage.getImgbytes());
 		       	 userimage.setBase64Image(base64Image);
 		       	 userimage.setImgid(userimage.getImgid());
-		       	 getimg.add(userimage);
 			}
+			user.setPic(userimg);
 			
 			return user;
 		}
@@ -88,7 +92,7 @@ public class UserServiceImpl implements UserService{
 		{
 			LOG.info("User service,getUsers methods call");
 			List<User> userlist;
-			userlist = userdao.getUserList();
+			userlist = userdao.getUserList("user");
 			return userlist;
 		}
 		public void deleteUser(int userid)
@@ -120,30 +124,35 @@ public class UserServiceImpl implements UserService{
 			LOG.info("User service,getUserDetails methods call");
 			User user = userdao.findById(userID).get();
 			List<UserImage> userimg = user.getPic();
-			List<UserImage> getimg= new ArrayList<UserImage>();
 			for(UserImage userimage : userimg)
 			{  	  
 		       	 String base64Image = Base64.getEncoder().encodeToString(userimage.getImgbytes());
 		       	 userimage.setBase64Image(base64Image);
 		       	 userimage.setImgid(userimage.getImgid());
-		       	 getimg.add(userimage);
 			}
+			user.setPic(userimg);
 			return user;
 		}
 		public List<UserAddress> getUserAddress(int userid)
 		{
 			LOG.info("User Address service,getUserAddress methods call");
-			List<UserAddress> useraddlist = userdao.getUserAddress(userid);
+			List<UserAddress> useraddlist = useraddressdao.getUserAddress(userid);
 			return useraddlist;
 		}
-		public void deleteAddress(UserAddress address)
+		public void deleteAddress(UserAddress address,User user)
 		{
 			LOG.info("User Address service,deleteAddress methods call");
-			useraddressdao.delete(address);
+			
+			user.getAddress().removeIf(useraddress -> useraddress.getAddressid() == address.getAddressid());
+			this.userdao.save(user);
+			this.useraddressdao.delete(address);
 		}
-		public void deleteImage(int imgid)
+		public void deleteImage(int imgid,int userid)
 		{
+			User user = userdao.getById(userid);
+			user.getPic().removeIf(userpic -> userpic.getImgid() == imgid);
 			LOG.info("User Image service,deleteImage methods call");
-			userimagedao.deleteById(imgid);
+			this.userdao.save(user);
+			this.userimagedao.deleteById(imgid);
 		}
 }

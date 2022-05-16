@@ -58,7 +58,7 @@ public class User {
 	@Valid
 	private List<UserAddress> address;
 	
-	@LazyCollection(LazyCollectionOption.FALSE)
+    @LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private List<UserImage>  pic;
 	

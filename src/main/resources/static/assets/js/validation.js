@@ -4,12 +4,14 @@ $(document).ready(function() {
 			var answer = confirm("Are you want to delete image?");
 				if(answer==true)
 				{
-						var imageid = +this.id; 
+						var imageid = +this.id;
+						var usrid = $("#userid").val();
 						$.ajax({
-						url: "removeImage",
+						url:"removeImage",
 						type: "POST",
 						data: {
 							   imgId : imageid,
+							   userid :usrid,
 							  }, 
 						success : function(data){
 						$("#"+imageid).remove();

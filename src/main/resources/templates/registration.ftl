@@ -1,13 +1,16 @@
+<#import "spring.ftl" as spring />
 <html>
 <head>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
-<style>
-	<#include "assets/library/bootstrap/css/bootstrap.min.css">
-    <#include "assets/css/custom.css">
-    <#include "assets/css/responsive.css">
-    <#include "assets/dist/image-uploader.min.css">
-  </style>
+<link href="<@spring.url 'assets/library/bootstrap/css/bootstrap.min.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/custom.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/responsive.css' />"
+		  rel="stylesheet" >
+		  <link href="<@spring.url 'assets/dist/image-uploader.min.css' />"
+		  rel="stylesheet" >
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
@@ -17,7 +20,7 @@
 	<div class="container Form-Section">
 		<h2 class="header" style="text-decoration: underline"><#if user ?? && !faildata ??>Edit <#else>Registration </#if> Page</h2>
 				<form <#if user ?? && !faildata ??>action="editServlet" <#else>action="userRegistration" </#if> method="POST" class="form-horizontal" id="myform" enctype="multipart/form-data">
-				<span style="color:red">${message!""}</span>
+				<#if message ??><span style="color:red">${message?join("<br>")}</span></#if>
 		<div class="row left-gap">
 		<#if user ?? && !faildata ??>
 			<input type="hidden" name="userID" value="${user.userID}" id="userid">
@@ -123,7 +126,7 @@
 							<div class="input-images"></div>
 						 </div>
 					  </div>
-		</div>
+			</div>
   	<div id="main-container">
   			<#if user ??>
   				<#list user.address as useradd>
@@ -216,12 +219,10 @@
 </div>	
 </section>
 <#include "Footer.ftl">
-<script>
-		<#include "assets/js/jquery-3.6.0.min.js">
-		<#include "assets/js/cloneData.js">	
-		<#include "assets/dist/image-uploader.min.js">
-		<#include "assets/js/custom.js">
-		<#include "assets/js/validation.js">
-</script>
+<script type="text/javascript" src="<@spring.url 'assets/js/jquery-3.6.0.min.js' />"></script>
+<script type="text/javascript" src="<@spring.url 'assets/js/custom.js' />"></script>
+<script type="text/javascript" src="<@spring.url 'assets/dist/image-uploader.min.js' />"></script>
+<script type="text/javascript" src="<@spring.url 'assets/js/validation.js' />"></script>
+<script type="text/javascript" src="<@spring.url 'assets/js/cloneData.js' />"></script>
 </body>
 </html>

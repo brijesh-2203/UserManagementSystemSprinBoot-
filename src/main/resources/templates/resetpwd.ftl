@@ -1,10 +1,14 @@
+<#import "spring.ftl" as spring />
 <html>
 <head>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
-<link rel="stylesheet" type="text/css" href="assets/library/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/custom.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/responsive.css">
+<link href="<@spring.url 'assets/library/bootstrap/css/bootstrap.min.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/custom.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/responsive.css' />"
+		  rel="stylesheet" >
 </head>
 <body>
 <#include "Header.ftl"> 
@@ -14,7 +18,7 @@
 			<div class="col-md-3 col-sm-3"></div>
 			<div class="col-md-4 col-sm-4 login">
 				<h1 class="heading" style="text-decoration: underline">Reset Password</h1>
-				<form action="ResetPassword" method="POST">
+				<form action="resetPassword" method="POST">
 					<div class="form-group">
 					Password:<input type="password" placeholder="Enter Password" id="pwd" class="form-control" name="password" required>
 					</div>
@@ -32,8 +36,7 @@
 	</div>
 </section>
 <#include "Footer.ftl"> 
-	<script>
-	<#include "assets/js/jquery-3.6.0.min.js">
-		<#include "assets/js/validation.js"></script>
+<script type="text/javascript" src="<@spring.url 'assets/js/jquery-3.6.0.min.js' />"></script>
+<script type="text/javascript" src="<@spring.url 'assets/js/validation.js' />"></script>
 </body>
 </html>

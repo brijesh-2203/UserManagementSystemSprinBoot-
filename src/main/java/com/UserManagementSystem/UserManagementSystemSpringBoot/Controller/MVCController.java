@@ -13,29 +13,33 @@ import javax.validation.Valid;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.User;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserAddress;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserImage;
+import com.UserManagementSystem.UserManagementSystemSpringBoot.Filter.BackButtonPrevention;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Service.UserService;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass.CheckValidation;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass.EncryptPwd;
 
+
 @Controller
-public class SpringMVCController{
-	static final Logger LOG = LogManager.getLogger(SpringMVCController.class.getName());
+public class MVCController {
+	static final Logger LOG = LogManager.getLogger(MVCController.class.getName());
 	@Autowired
 	private UserService userservice;
 	@Autowired
@@ -58,61 +62,26 @@ public class SpringMVCController{
 		return "forgotpwd";
 	}
 	@PostMapping(path="/userRegistration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public String registerUser(@Valid @ModelAttribute User  user,BindingResult br,Model model,HttpSession session,@RequestParam("image[]") CommonsMultipartFile[] files,HttpServletRequest request,@RequestParam("repass") String repass) throws IOException, ServletException
+	public String registerUser(@Valid @ModelAttribute User  user,BindingResult br,Model model,HttpSession session,@RequestParam("image[]") MultipartFile[] files,HttpServletRequest request,@RequestParam("repass") String repass) throws IOException, ServletException
 	{
-		String msg="";
+		String msg=val.validData(user,repass);
+		List<String> errors = new ArrayList<String>();
 		if(br.hasErrors())  
         { 
 			List<FieldError> error =br.getFieldErrors();
-			String errors ="";
 			for(FieldError err: error)
 			{
-				errors += err.getDefaultMessage() + "<br>";
-			}
+				errors.add(err.getDefaultMessage());
+
+			}			
 			model.addAttribute("message",errors);
 			model.addAttribute("faildata",user);
 			return "registration";
         }
-		else if(user.getEmail().equals(""))
+		else if(!msg.equals("valid"))
 		{
-			msg= "*Email is required";
-			model.addAttribute("message",msg);
-			model.addAttribute("faildata",user);
-			return "registration";
-		}
-		else if(userservice.userExist(user.getEmail()))
-		{
-			LOG.info("*Email already exist");
-			msg= "*Email already exist";
-			model.addAttribute("message",msg);
-			model.addAttribute("faildata",user);
-			return "registration";
-		}
-		else if(user.getPassword().equals(""))
-		{
-			msg= "*Password is required";
-			model.addAttribute("message",msg);
-			model.addAttribute("faildata",user);
-			return "registration";
-		}
-		else if(String.valueOf(user.getPhone()).length()<10)
-		{
-			msg= "*Number not less than 10 Digits";
-			model.addAttribute("message",msg);
-			model.addAttribute("faildata",user);
-			return "registration";
-		}
-		else if(val.validatepwd(user.getPassword()))
-		{
-			msg="*Please Choose Strong Password.";
-			model.addAttribute("message",msg);
-			model.addAttribute("faildata",user);
-			return "registration";
-		}
-		else if(!user.getPassword().equals(repass))
-		{
-			msg= "*Confirm password Should be same as Password.";
-			model.addAttribute("message",msg);
+			errors.add(msg);
+			model.addAttribute("message",errors);
 			model.addAttribute("faildata",user);
 			return "registration";
 		}
@@ -122,7 +91,7 @@ public class SpringMVCController{
 			UserImage img;
 			if (files != null && files.length > 0) 
 			{
-	            for (CommonsMultipartFile aFile : files)
+	            for (MultipartFile aFile : files)
 	            {
 	            	img= new UserImage();
 	                img.setImgbytes(aFile.getBytes());
@@ -139,7 +108,7 @@ public class SpringMVCController{
 	        }
 	        else
 	        {
-	        	return "index";   //Check if session has no attribute the redirect it to login page
+	        	return "redirect:index";   //Check if session has no attribute the redirect it to login page
 	        }
 		}
 		
@@ -216,7 +185,7 @@ public class SpringMVCController{
 	         session.invalidate(); 								//Session close or Session Invalidate after logout user
         }   
         LOG.debug("Successfully logged out");
-        return "index";
+        return "redirect:index";
 	}
 	@RequestMapping("/forgotPwd")
 	public String afterforgotpwd(Model model,@RequestParam String email
@@ -269,7 +238,7 @@ public class SpringMVCController{
 		user.setPassword(pwd);
 		LOG.info("Password is changed");
 		userservice.changePwd(user);      //Calling method who change the password and reset to the database
-		return "index";
+		return "redirect:index";
 	}
 	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -303,15 +272,15 @@ public class SpringMVCController{
 		}
 	}
 	@PostMapping(path="/editServlet", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public String edit(@Valid @ModelAttribute User  user,BindingResult br,Model model,HttpSession session,@RequestParam("image[]") CommonsMultipartFile[] files,HttpServletRequest request,@RequestParam("addressid") String [] addressid)
+	public String edit(@Valid @ModelAttribute User  user,BindingResult br,Model model,HttpSession session,@RequestParam("image[]") MultipartFile[] files,HttpServletRequest request,@RequestParam("addressid") String [] addressid) throws IOException
 	{
 		if(br.hasErrors())  
         { 
 			List<FieldError> error =br.getFieldErrors();
-			String errors ="";
+			List<String> errors = new ArrayList<String>();
 			for(FieldError err: error)
 			{
-				errors += err.getDefaultMessage() + "<br>";
+				errors.add(err.getDefaultMessage());
 			}
 			model.addAttribute("message",errors);
 			User usr = userservice.getUserDetails(user.getUserID());
@@ -346,13 +315,13 @@ public class SpringMVCController{
 						else
 						{
 							LOG.debug("Address deleted");
-							userservice.deleteAddress(ud);     //user Address deleted
+							userservice.deleteAddress(ud,oldUser);     //user Address deleted
 						}
 					}
 					else
 					{
 						LOG.debug("Address deleted");
-						userservice.deleteAddress(ud);   //user Address deleted
+						userservice.deleteAddress(ud,oldUser);   //user Address deleted
 					}
 					index++;
 				}
@@ -379,7 +348,7 @@ public class SpringMVCController{
 				UserImage img;
 				if (files != null && files.length > 0) 
 				{
-		            for (CommonsMultipartFile aFile : files)
+		            for (MultipartFile aFile : files)
 		            {
 		                if(aFile.getSize()>0)
 		                {
@@ -416,11 +385,12 @@ public class SpringMVCController{
 	}
 	@PostMapping("/removeImage")
 	@ResponseBody
-	public String deleteUserImage(@RequestParam String imgId)
+	public String deleteUserImage(@RequestParam String imgId,@RequestParam("userid") String usrid)
 	{ 
 		String message="";
 		int imageid = Integer.parseInt(imgId);
-		userservice.deleteImage(imageid);         //Delete image from the database 
+		int userid = Integer.parseInt(usrid);
+		userservice.deleteImage(imageid,userid);         //Delete image from the database 
 		LOG.debug("image-deleted");
 		message="image deleted succesfully";
 		return message;

@@ -1,12 +1,15 @@
+<#import "spring.ftl" as spring />
 <html>
 <head>
 <meta charset="ISO-8859-1">
 <title>Login Page</title>
-<style>
-	<#include "assets/library/bootstrap/css/bootstrap.min.css">
-    <#include "assets/css/custom.css">
-    <#include "assets/css/responsive.css">
-</style>
+
+<link href="<@spring.url 'assets/library/bootstrap/css/bootstrap.min.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/custom.css' />"
+		  rel="stylesheet" >
+<link href="<@spring.url 'assets/css/responsive.css' />"
+		  rel="stylesheet" >
 </head>
 <body>
 <#include "Header.ftl">
@@ -17,7 +20,7 @@
 				<div class="col-md-3 col-sm-3"></div>
 				<div class="col-md-4 col-sm-4 login">
 					<h1 class="heading" style="text-decoration: underline">Login Page</h1>
-					<form action="LoginServlet" method="POST">
+					<form action="loginServlet" method="POST">
 						<span style="color:red">${message!""}</span>
 						<div class="form-group label-name">
 						Email :<input type="email" placeholder="Enter Email-ID"  class="form-control" name="email" required>

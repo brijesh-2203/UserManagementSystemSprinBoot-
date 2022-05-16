@@ -2,6 +2,9 @@ package com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass;
 
 import java.security.MessageDigest;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class EncryptPwd {
 
 	public String encryption(String password)
