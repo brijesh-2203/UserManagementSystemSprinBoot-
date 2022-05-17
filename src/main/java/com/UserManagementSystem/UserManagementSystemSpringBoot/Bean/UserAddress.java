@@ -1,5 +1,7 @@
 package com.UserManagementSystem.UserManagementSystemSpringBoot.Bean;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 
 import javax.persistence.GeneratedValue;
@@ -10,8 +12,9 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 /*UserAddress Bean Class*/
+@SuppressWarnings("serial")
 @Entity
-public class UserAddress {
+public class UserAddress implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private int addressid;

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Insert title here</title>
+<title>Registration Page</title>
 <link href="<@spring.url 'assets/library/bootstrap/css/bootstrap.min.css' />"
 		  rel="stylesheet" >
 <link href="<@spring.url 'assets/css/custom.css' />"
@@ -58,7 +58,7 @@
 			<div class="col-md-2"></div>
 			<div class="col-md-5">
 				 <div class="form-group">
-					Phone:<input type="number" name="phone" minlength="10" <#if user ??>value="${user.phone?string.computer}"</#if>  <#if faildata ??>value="${faildata.phone?string.computer}"</#if> size="10" id="phone" class="form-control" placeholder="Enter Phone Number" required>
+					Phone:<input type="number" name="phone" maxlength="13" <#if user ??>value="${user.phone?string.computer}"</#if>  <#if faildata ??>value="${faildata.phone?string.computer}"</#if> size="10" id="phone" class="form-control" placeholder="Enter Phone Number" required>
 				 </div>
 				 <div class="form-group">
 				 	Date of Birth: <input type="date" id="dob" class="form-control" <#if user ??>value="${user.dateofbirth!}"</#if> <#if faildata ??>value="${faildata.dateofbirth!}"</#if> name="dateofbirth" required>

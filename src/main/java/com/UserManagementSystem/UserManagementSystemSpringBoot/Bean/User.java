@@ -1,4 +1,5 @@
 package com.UserManagementSystem.UserManagementSystemSpringBoot.Bean;
+import java.io.Serializable;
 import java.util.*;
 
 import javax.persistence.CascadeType;
@@ -18,8 +19,9 @@ import org.hibernate.annotations.LazyCollectionOption;
 
 
 //User Bean Class
+@SuppressWarnings("serial")
 @Entity
-public class User {
+public class User implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private int userID;

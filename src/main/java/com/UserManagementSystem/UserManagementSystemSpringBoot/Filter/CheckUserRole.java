@@ -13,10 +13,10 @@ import javax.servlet.http.*;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.User;
-
-@WebFilter(urlPatterns = {"/adminDashBoard","/adminWork"})
+@Component
 public class CheckUserRole implements Filter {
 	static final Logger LOG = LogManager.getLogger(CheckUserRole.class.getName());
 	public void destroy() {	}

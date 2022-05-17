@@ -3,7 +3,6 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Login Page</title>
-
 <link href="<@spring.url 'assets/library/bootstrap/css/bootstrap.min.css' />"
 		  rel="stylesheet" >
 <link href="<@spring.url 'assets/css/custom.css' />"

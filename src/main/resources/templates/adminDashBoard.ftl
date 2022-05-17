@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Insert title here</title>
+<title>AdminDashBoard</title>
 <link href="<@spring.url 'assets/library/bootstrap/css/bootstrap.min.css' />"
 		  rel="stylesheet" >
 		  <link href="<@spring.url 'assets/library/DataTables/datatables.min.css' />"
