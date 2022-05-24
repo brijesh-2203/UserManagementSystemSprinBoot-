@@ -36,15 +36,20 @@ public class UserServiceImpl implements UserService{
 		{
 			LOG.info("User service,userExist methods call");
 			boolean status;
-			User user = userdao.userExist(mail);
-			if(user==null)
+			List<User> userlist = userdao.findByEmail(mail);
+			User user=null;
+			if(userlist.size()>0)
 			{
-				status =false;
+				 user = userlist.get(0);
 			}
-			else
-			{
-				status=true;
-			}
+				if(user==null)
+				{
+					status =false;
+				}
+				else
+				{
+					status=true;
+				}
 			return status;
 		}
 		public void registerUser(User user)
@@ -71,15 +76,21 @@ public class UserServiceImpl implements UserService{
 		public User checkUser(String email)
 		{
 			LOG.info("User service,checkUser methods call");
-			User user = userdao.validUser(email);
+			List<User> userlist = userdao.findByEmail(email);
+			User user=null;
+			if(userlist.size()>0)
+			{
+				 user = userlist.get(0);
+			}
 			List<UserImage> userimg = user.getPic();
 			for(UserImage userimage : userimg)
-			{  	  
+			{ 
 		       	 String base64Image = Base64.getEncoder().encodeToString(userimage.getImgbytes());
 		       	 userimage.setBase64Image(base64Image);
 		       	 userimage.setImgid(userimage.getImgid());
 			}
 			user.setPic(userimg);
+			
 			
 			return user;
 		}
@@ -92,7 +103,7 @@ public class UserServiceImpl implements UserService{
 		{
 			LOG.info("User service,getUsers methods call");
 			List<User> userlist;
-			userlist = userdao.getUserList("user");
+			userlist = userdao.findByRole("user");
 			return userlist;
 		}
 		public void deleteUser(int userid)
@@ -122,7 +133,12 @@ public class UserServiceImpl implements UserService{
 		public User getUserDetails(int userID)
 		{
 			LOG.info("User service,getUserDetails methods call");
-			User user = userdao.findById(userID).get();
+			List<User> userlist = userdao.findByUserID(userID);
+			User user=null;
+			if(userlist.size()>0)
+			{
+				 user = userlist.get(0);
+			}
 			List<UserImage> userimg = user.getPic();
 			for(UserImage userimage : userimg)
 			{  	  
@@ -149,7 +165,12 @@ public class UserServiceImpl implements UserService{
 		}
 		public void deleteImage(int imgid,int userid)
 		{
-			User user = userdao.getById(userid);
+			List<User> userlist = userdao.findByUserID(userid);
+			User user=null;
+			if(userlist.size()>0)
+			{
+				 user = userlist.get(0);
+			}
 			user.getPic().removeIf(userpic -> userpic.getImgid() == imgid);
 			LOG.info("User Image service,deleteImage methods call");
 			this.userdao.save(user);

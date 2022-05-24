@@ -10,14 +10,10 @@ import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.User;
 
 public interface UserDao extends JpaRepository<User,Integer>{
 	
-	@Query("from User where email=?1")
-	public User userExist(String mail);
+	public List<User> findByEmail(String email); 
 	
-	@Query("from User where role=?1")
-	public List<User> getUserList(String role);
+	public List<User> findByRole(String role);
 	
-	@Query("from User where email=?1")
-	public User validUser(String email);
-	
+	public List<User> findByUserID(int userid);
 	
 }
