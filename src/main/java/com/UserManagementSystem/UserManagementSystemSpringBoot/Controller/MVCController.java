@@ -2,6 +2,7 @@ package com.UserManagementSystem.UserManagementSystemSpringBoot.Controller;
 
 import java.io.IOException;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +14,11 @@ import javax.validation.Valid;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,11 +26,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.User;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserAddress;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserImage;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.Filter.BackButtonPrevention;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Service.UserService;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass.CheckValidation;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass.EncryptPwd;
@@ -42,10 +39,7 @@ public class MVCController {
 	static final Logger LOG = LogManager.getLogger(MVCController.class.getName());
 	@Autowired
 	private UserService userservice;
-	@Autowired
-	private EncryptPwd encrypt;
-	@Autowired
-	private CheckValidation val;
+	
 	@RequestMapping({"/","/index"})
 	public String index()
 	{
@@ -62,9 +56,9 @@ public class MVCController {
 		return "forgotpwd";
 	}
 	@PostMapping(path="/userRegistration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public String registerUser(@Valid @ModelAttribute User  user,BindingResult br,Model model,HttpSession session,@RequestParam("image[]") MultipartFile[] files,HttpServletRequest request,@RequestParam("repass") String repass) throws IOException, ServletException
+	public String registerUser(@Valid @ModelAttribute User  user,BindingResult br,Model model,HttpSession session,@RequestParam(value="image[]",required=false)MultipartFile[] files,HttpServletRequest request,@RequestParam("repass") String repass) throws IOException, ServletException
 	{
-		String msg=val.validData(user,repass);
+		String msg=CheckValidation.validData(user,repass);
 		List<String> errors = new ArrayList<String>();
 		if(br.hasErrors())  
         { 
@@ -84,6 +78,14 @@ public class MVCController {
 			model.addAttribute("message",errors);
 			model.addAttribute("faildata",user);
 			return "registration";
+		}
+		else if(userservice.userExist(user.getEmail()))
+		{
+			String message= "*Email already exist";
+			errors.add(message);
+			model.addAttribute("message",errors);
+			model.addAttribute("faildata",user);
+			return "registration";	
 		}
 		else
 		{
@@ -128,7 +130,7 @@ public class MVCController {
 	@PostMapping("/loginServlet")
 	public String login(HttpServletRequest request,HttpSession session,Model model,@RequestParam String email,@RequestParam String password)
 	{
-		String pwd = encrypt.encryption(password);
+		String pwd = EncryptPwd.encryption(password);
 		User user = userservice.checkUser(email);     //check the user is present in database or not
 		if(user!=null)
 			{
@@ -180,10 +182,7 @@ public class MVCController {
 	public String logout(HttpServletRequest request,HttpSession session)
 	{
         session=request.getSession(false); 
-        if(session!=null)
-        {
-	         session.invalidate(); 								//Session close or Session Invalidate after logout user
-        }   
+        session.invalidate(); 								//Session close or Session Invalidate after logout user
         LOG.debug("Successfully logged out");
         return "redirect:index";
 	}
@@ -233,7 +232,7 @@ public class MVCController {
 	@RequestMapping("/resetPassword")
 	public String changepwd(HttpServletRequest request,@RequestParam("usermail") String usermail,@RequestParam String password)
 	{
-		String pwd = encrypt.encryption(password);
+		String pwd = EncryptPwd.encryption(password);
 		User user = userservice.checkUser(usermail);
 		user.setPassword(pwd);
 		LOG.info("Password is changed");
@@ -242,13 +241,12 @@ public class MVCController {
 	}
 	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
 	@ResponseBody
-	public String deleteUser(@RequestParam String userid)
+	public void deleteUser(@RequestParam String userid)
 	{
 		LOG.debug("Enter in Delete User servlet");
 		int uid = Integer.parseInt(userid);
 		userservice.deleteUser(uid);               //Calling a method to delete the user from the database
 		LOG.debug("User deleted");
-		return "redirect:adminWork";
 	}
 	@RequestMapping("/userDetails")
 	public String goingToEdit(HttpServletRequest request,HttpSession session,Model model)
@@ -281,6 +279,7 @@ public class MVCController {
 			for(FieldError err: error)
 			{
 				errors.add(err.getDefaultMessage());
+				System.out.println("esnmncx: "+err.getDefaultMessage());
 			}
 			model.addAttribute("message",errors);
 			User usr = userservice.getUserDetails(user.getUserID());
@@ -305,7 +304,7 @@ public class MVCController {
 				for(UserAddress ud:useraddresses)
 				{	
 					oldAddressid[index]=ud.getAddressid();
-					if(count<addressIdLength && addressid[count].length()!=0)
+					if(count<addressIdLength)
 					{
 						int addrssid=Integer.parseInt(addressid[count]);
 						if(oldAddressid[index]==addrssid)

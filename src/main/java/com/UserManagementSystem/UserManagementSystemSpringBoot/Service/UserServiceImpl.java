@@ -1,11 +1,7 @@
 package com.UserManagementSystem.UserManagementSystemSpringBoot.Service;
 
-
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-
-import javax.transaction.Transactional;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -30,8 +26,6 @@ public class UserServiceImpl implements UserService{
 	private UserAddressDao useraddressdao;
 	@Autowired
 	private UserImageDao userimagedao;
-	@Autowired
-	private EncryptPwd encrypt;
 		public boolean userExist(String mail)
 		{
 			LOG.info("User service,userExist methods call");
@@ -55,7 +49,7 @@ public class UserServiceImpl implements UserService{
 		public void registerUser(User user)
 		{
 			LOG.info("User service,registerUser methods call");
-			String pwd = encrypt.encryption(user.getPassword());
+			String pwd = EncryptPwd.encryption(user.getPassword());
 			user.setPassword(pwd);
 			user.setRole("user");
 			List<UserAddress>  add = user.getAddress();
@@ -78,10 +72,8 @@ public class UserServiceImpl implements UserService{
 			LOG.info("User service,checkUser methods call");
 			List<User> userlist = userdao.findByEmail(email);
 			User user=null;
-			if(userlist.size()>0)
-			{
-				 user = userlist.get(0);
-			}
+			 user = userlist.get(0);
+			
 			List<UserImage> userimg = user.getPic();
 			for(UserImage userimage : userimg)
 			{ 
@@ -135,10 +127,8 @@ public class UserServiceImpl implements UserService{
 			LOG.info("User service,getUserDetails methods call");
 			List<User> userlist = userdao.findByUserID(userID);
 			User user=null;
-			if(userlist.size()>0)
-			{
-				 user = userlist.get(0);
-			}
+			 user = userlist.get(0);
+			
 			List<UserImage> userimg = user.getPic();
 			for(UserImage userimage : userimg)
 			{  	  
@@ -167,10 +157,8 @@ public class UserServiceImpl implements UserService{
 		{
 			List<User> userlist = userdao.findByUserID(userid);
 			User user=null;
-			if(userlist.size()>0)
-			{
-				 user = userlist.get(0);
-			}
+			user = userlist.get(0);
+			
 			user.getPic().removeIf(userpic -> userpic.getImgid() == imgid);
 			LOG.info("User Image service,deleteImage methods call");
 			this.userdao.save(user);

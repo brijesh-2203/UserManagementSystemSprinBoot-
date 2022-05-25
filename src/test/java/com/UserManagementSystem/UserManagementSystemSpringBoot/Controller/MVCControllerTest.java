@@ -1,29 +1,26 @@
 package com.UserManagementSystem.UserManagementSystemSpringBoot.Controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +29,8 @@ import javax.imageio.ImageIO;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.User;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserAddress;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Bean.UserImage;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.Dao.UserAddressDao;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.Dao.UserDao;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.Dao.UserImageDao;
 import com.UserManagementSystem.UserManagementSystemSpringBoot.Service.UserService;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.Service.UserServiceImpl;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass.CheckValidation;
-import com.UserManagementSystem.UserManagementSystemSpringBoot.UtilityClass.EncryptPwd;
+
 
 @WebMvcTest(MVCController.class)
 class MVCControllerTest {
@@ -49,17 +41,14 @@ class MVCControllerTest {
 	@MockBean
 	private UserService userservice;
 
-	@MockBean
-	private CheckValidation val;
-
-	@MockBean
-	private EncryptPwd encrypt;
-
 	private User user;
 
 	private UserAddress add;
-
+	
 	private UserImage userimage;
+	
+	ByteArrayOutputStream output;
+	List<UserAddress> addlist;
 	@BeforeEach
 	void setUp() throws Exception {
 		user = new User();
@@ -73,12 +62,11 @@ class MVCControllerTest {
 		user.setAnswer2("Hello");
 		user.setDateofbirth("22/03/2000");
 		user.setLanguage("English");
-		String pwd = encrypt.encryption("12345");
-		user.setPassword(pwd);
+		user.setPassword("Brijesh163@");
 		user.setPhone(9898990074L);
-		user.setRole("user");
+		user.setRole("admin");
 		user.setUserID(1);
-		List<UserAddress> addlist = new ArrayList<UserAddress>();
+		addlist = new ArrayList<UserAddress>();
 		add.setAdd1("Narol");
 		add.setAdd2("NarolRoad");
 		add.setAddressid(2);
@@ -93,17 +81,13 @@ class MVCControllerTest {
 		userimage.setImgid(3);
 		userimage.setUser(user);
 		BufferedImage bufferimage = ImageIO.read(new File("C:\\Users\\BRIJESH RAJPUT\\Downloads\\download.png"));
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		output = new ByteArrayOutputStream();
 		ImageIO.write(bufferimage, "png", output);
 		byte[] data = output.toByteArray();
 		userimage.setImgbytes(data);
 		imglist.add(userimage);
 		user.setPic(imglist);
 	}
-//
-//	@AfterEach
-//	void tearDown() throws Exception {
-//	}
 
 	@Test
 	void testIndex() throws Exception {
@@ -114,86 +98,456 @@ class MVCControllerTest {
 	void testRegister() throws Exception {
 		this.mockMvc.perform(get("/registration"));
 	}
-//
+
+	@Test
+	void testForgotpwd() throws Exception {
+		this.mockMvc.perform(get("/forgotpwd"));
+	}
+	@Test
+	void testRegisterUser1() throws Exception {
+		mockMvc.perform(multipart("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.sessionAttr("USER", user)
+				.param("repass","Brijesh163@"))
+	.andExpect(redirectedUrl("adminWork"));
+	}
+	@Test
+	void testRegisterUser1a() throws Exception {		
+		FileInputStream filein = new FileInputStream(new File("C:\\Users\\BRIJESH RAJPUT\\Downloads\\download.png"));
+		
+		MockMultipartFile mockfilein = new MockMultipartFile("image[]", "abcd.jpg", "multipart/form-data",filein);
+		
+		mockMvc.perform(multipart("/userRegistration").file(mockfilein)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.sessionAttr("USER", user)
+				.param("repass","Brijesh163@"))
+	.andExpect(redirectedUrl("adminWork"));
+	}
+	
+	@Test
+	void testRegisterUser2() throws Exception {
+		user.setRole("user");
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh163@"))
+	.andExpect(redirectedUrl("index"));
+	}
+	
+	@Test
+	void testRegisterUser3() throws Exception {
+		user.setLastname("1234");
+		user.setPic(null);
+		user.setRole("user");
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh163@"));
+	}
+	@Test
+	void testRegisterUser4() throws Exception {
+		user.setPassword("Brijesh163@");
+		user.setRole("user");
+		user.setPic(null);
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh13@"));
+	}
+	@Test
+	void testRegisterUser5() throws Exception {
+		user.setEmail("");
+		user.setRole("user");
+		user.setPic(null);
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh13@"));
+	}
+	@Test
+	void testRegisterUser6() throws Exception {
+		user.setPassword("");
+		user.setRole("user");
+		user.setPic(null);
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh13@"));
+	}
+	@Test
+	void testRegisterUser7() throws Exception {
+		user.setPhone(12345L);
+		user.setRole("user");
+		user.setPic(null);
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh13@"));
+	}
+	@Test
+	void testRegisterUser8() throws Exception {
+		user.setPassword("123@");
+		user.setRole("user");
+		user.setPic(null);
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh13@"));
+	}
+	@Test
+	void testRegisterUser9() throws Exception {
+		user.setRole("user");
+		user.setPic(null);
+		when(userservice.userExist(user.getEmail())).thenReturn(true);
+		mockMvc.perform(post("/userRegistration")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.flashAttr("user", user)
+				.param("repass","Brijesh163@"));
+	}
 //	@Test
-//	void testForgotpwd() {
-//		fail("Not yet implemented");
+//	void testRegisterUser3() throws Exception {
+//		String msg="valid";
+//		when(val.validData(user, "Brijesh163@")).thenReturn(msg);
+//		user.setRole("user");
+//		mockMvc.perform(post("/userRegistration")
+//				.contentType(MediaType.MULTIPART_FORM_DATA)
+//				.accept(MediaType.MULTIPART_FORM_DATA)
+//				.flashAttr("user", user)
+//				.sessionAttr("USER", user)
+//				.param("repass","Brijesh163@"))
+//	.andExpect(redirectedUrl("userDashBoard"));
+//	}
+//	@Test
+//	void testRegisterUser4() throws Exception {
+//		String msg="valid";
+//		when(val.validData(user, "Brijesh163@")).thenReturn(msg);
+//		mockMvc.perform(multipart("/userRegistration")
+//				.contentType(MediaType.MULTIPART_FORM_DATA)
+//				.accept(MediaType.MULTIPART_FORM_DATA)
+//				.flashAttr("user", user)
+//				.param("repass","Brijesh163@"))
+//	.andExpect(redirectedUrl("index"));
+//	}
+
+//	@Test
+//	void testRegisterUser1() throws Exception {
+//		String msg="valid";
+//		when(val.validData(user, "Brijesh163@")).thenReturn(msg);
+//		mockMvc.perform(multipart("/userRegistration")
+//				.contentType(MediaType.MULTIPART_FORM_DATA)
+//				.accept(MediaType.MULTIPART_FORM_DATA)
+//				.flashAttr("user", user)
+//				.sessionAttr("USER", user)
+//				.param("repass","Brijesh163@"))
+//	.andExpect(redirectedUrl("adminWork"));
+//	}
+//	@Test
+//	void testRegisterUser2() throws Exception {
+//		String msg="valid";
+//		when(val.validData(user, "Brijesh163@")).thenReturn(msg);
+//		mockMvc.perform(multipart("/userRegistration")
+//				.contentType(MediaType.MULTIPART_FORM_DATA)
+//				.accept(MediaType.MULTIPART_FORM_DATA)
+//				.flashAttr("user", user)
+//				.param("repass","Brijesh163@"))
+//	.andExpect(redirectedUrl("index"));
+//	}
+//	@Test
+//	void testRegisterUser2() throws Exception {
+//		String pwd = encrypt.encryption("12345");
+//		user.setRole("user");
+//		mockMvc.perform(post("/userRegistration")
+//				.contentType(MediaType.MULTIPART_FORM_DATA)
+//				.accept(MediaType.MULTIPART_FORM_DATA)
+//				.flashAttr("user", user)
+//				.sessionAttr("USER", user)
+//				.param("repass",pwd))
+//	.andExpect(redirectedUrl("index"));
+//	}
+//	@Test
+//	void testRegisterUser3() throws Exception {
+//		String pwd = encrypt.encryption("12345");
+//		mockMvc.perform(post("/userRegistration")
+//				.contentType(MediaType.MULTIPART_FORM_DATA)
+//				.accept(MediaType.MULTIPART_FORM_DATA)
+//				.flashAttr("user", user)
+//				.param("repass",pwd))
+//	.andExpect(redirectedUrl("index"));
 //	}
 
 	@Test
-	void testRegisterUser() throws Exception {
-		//when(userservice.registerUser(user).;
-		//when(userservice.registerUser(user)).thenReturn();
-//		mockMvc.perform(post("/userRegistration").accept(MediaType.MULTIPART_FORM_DATA_VALUE).content(objectMapper.writeValueAsString(user)))
-//        .andExpect(status().isOk());
+	void testCheckuserexist1() throws Exception {
+		boolean status = true;
+		when(userservice.userExist(user.getEmail())).thenReturn(status);
+		mockMvc.perform(post("/checkUserExistDone").param("email",user.getEmail()))
+		.andExpect(content().string("*Email already exist"));
 	}
-
 	@Test
-	void testCheckuserexist() throws Exception {
+	void testCheckuserexist2() throws Exception {
 		boolean status = false;
 		when(userservice.userExist(user.getEmail())).thenReturn(status);
-		mockMvc.perform(post("/checkUserExistDone")).andDo(print())
+		mockMvc.perform(post("/checkUserExistDone").param("email",user.getEmail()))
 		.andExpect(content().string(""));
 	}
-//
-//	@Test
-//	void testLogin() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testAdminPanel() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testUserDashBoard() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testLogout() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testAfterforgotpwd() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testResetpwd() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testChangepwd() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testDeleteUser() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testGoingToEdit() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testEdit() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testUserData() {
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	void testDeleteUserImage() {
-//		fail("Not yet implemented");
-//	}
+
+	@Test
+	void testLogin1() throws Exception{
+		String pwd = "da57712a08b7f84f28b3e9bd3ed8be34";
+		user.setRole("user");
+		user.setPassword(pwd);
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/loginServlet")
+				.param("email", user.getEmail())
+				.param("password","Brijesh163@"))
+		.andExpect(redirectedUrl("userDashBoard"));;
+	}
+	@Test
+	void testLogin2() throws Exception{
+		String pwd = "da57712a08b7f84f28b3e9bd3ed8be34";
+		user.setPassword(pwd);
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/loginServlet")
+				.param("email", user.getEmail())
+				.param("password","Brijesh163@"))
+		.andExpect(redirectedUrl("adminWork"));
+	}
+	@Test
+	void testLogin3() throws Exception{
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/loginServlet")
+				.param("email", user.getEmail())
+				.param("password",user.getPassword()))
+		.andExpect(view().name("index"));
+	}
+	@Test
+	void testLogin4() throws Exception{
+		User userRequired =null;
+		when(userservice.checkUser(user.getEmail())).thenReturn(userRequired);
+		mockMvc.perform(post("/loginServlet")
+				.param("email", user.getEmail())
+				.param("password",user.getPassword()))
+		.andExpect(view().name("index"));
+	}
+
+	@Test
+	void testAdminPanel() throws Exception {
+		mockMvc.perform(post("/adminWork")
+				.sessionAttr("USER", user))
+		.andExpect(view().name("adminDashBoard"));
+	}
+
+	@Test
+	void testUserDashBoard() throws Exception {
+		mockMvc.perform(get("/userDashBoard").sessionAttr("USER", user));
+	}
+
+	@Test
+	void testLogout2() throws Exception {
+		mockMvc.perform(get("/logOut")).andExpect(redirectedUrl("index"));
+	}
+
+	@Test
+	void testAfterforgotpwd1() throws Exception {
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/forgotPwd")
+				.param("email", user.getEmail())
+				.param("birthdate",user.getDateofbirth())
+				.param("q1",user.getAnswer1())
+				.param("q2",user.getAnswer2()))
+		.andExpect(view().name("resetpwd"));
+	}
+	@Test
+	void testAfterforgotpwd2A() throws Exception {
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/forgotPwd")
+				.param("email", user.getEmail())
+				.param("birthdate",user.getDateofbirth())
+				.param("q1","done")
+				.param("q2",user.getAnswer2()))
+		.andExpect(view().name("forgotpwd"));
+	}
+	@Test
+	void testAfterforgotpwd2B() throws Exception {
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/forgotPwd")
+				.param("email", user.getEmail())
+				.param("birthdate",user.getDateofbirth())
+				.param("q1",user.getAnswer1())
+				.param("q2","done"))
+		.andExpect(view().name("forgotpwd"));
+	}
+	@Test
+	void testAfterforgotpwd2C() throws Exception {
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/forgotPwd")
+				.param("email", user.getEmail())
+				.param("birthdate",user.getDateofbirth())
+				.param("q1","done")
+				.param("q2","hum"))
+		.andExpect(view().name("forgotpwd"));
+	}
+	@Test
+	void testAfterforgotpwd3() throws Exception {
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/forgotPwd")
+				.param("email", user.getEmail())
+				.param("birthdate","12/12/2000")
+				.param("q1",user.getAnswer1())
+				.param("q2",user.getAnswer2()))
+		.andExpect(view().name("forgotpwd"));
+	}
+	@Test
+	void testAfterforgotpwd4() throws Exception {
+		User userRequired =null;
+		when(userservice.checkUser(user.getEmail())).thenReturn(userRequired);
+		mockMvc.perform(post("/forgotPwd")
+				.param("email", user.getEmail())
+				.param("birthdate",user.getDateofbirth())
+				.param("q1",user.getAnswer1())
+				.param("q2",user.getAnswer2()))
+		.andExpect(view().name("forgotpwd"));
+	}
+
+	@Test
+	void testResetpwd() throws Exception {
+		mockMvc.perform(post("/resetpwd"));
+	}
+
+	@Test
+	void testChangepwd() throws Exception {
+		when(userservice.checkUser(user.getEmail())).thenReturn(user);
+		mockMvc.perform(post("/resetPassword")
+				.param("usermail", user.getEmail())
+				.param("password",user.getPassword()))
+		.andExpect(redirectedUrl("index"));
+	}
+
+	@Test
+	void testDeleteUser() throws Exception {
+		mockMvc.perform(post("/deleteUser")
+				.param("userid", String.valueOf(user.getUserID())));
+	}
+
+	@Test
+	void testGoingToEdit1() throws Exception {
+		user.setRole("user");
+		user.setPic(null);
+		mockMvc.perform(post("/userDetails")
+				.sessionAttr("USER", user))
+		.andExpect(view().name("registration"));
+	}
+	@Test
+	void testGoingToEdit2() throws Exception {
+		mockMvc.perform(post("/userDetails")
+				.sessionAttr("USER", user)
+				.param("userid", String.valueOf(user.getUserID())))
+		.andExpect(view().name("registration"));
+	}
+
+	@Test
+	void testEdit1() throws Exception {
+		FileInputStream filein = new FileInputStream(new File("C:\\Users\\BRIJESH RAJPUT\\Downloads\\download.png"));
+		
+		MockMultipartFile mockfilein = new MockMultipartFile("image[]", "abcd.jpg", "multipart/form-data",filein);
+		when(userservice.getUserAddress(user.getUserID())).thenReturn(addlist);
+		when(userservice.getUserDetails(user.getUserID())).thenReturn(user);
+		mockMvc.perform(multipart("/editServlet").file(mockfilein)
+				.flashAttr("user", user)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+		.param("addressid", String.valueOf(add.getAddressid())))
+		.andExpect(redirectedUrl("userData"));
+	}
+	@Test
+	void testEdit2() throws Exception {
+		FileInputStream filein = new FileInputStream(new File("C:\\Users\\BRIJESH RAJPUT\\Downloads\\download.png"));
+		
+		MockMultipartFile mockfilein = new MockMultipartFile("image[]", "abcd.jpg", "multipart/form-data",filein);
+		when(userservice.getUserAddress(user.getUserID())).thenReturn(addlist);
+		when(userservice.getUserDetails(user.getUserID())).thenReturn(user);
+		mockMvc.perform(multipart("/editServlet").file(mockfilein)
+				.flashAttr("user", user)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+		.param("addressid", String.valueOf(23)))
+		.andExpect(redirectedUrl("userData"));
+	}
+	@Test
+	void testEdit3() throws Exception {
+		FileInputStream filein = new FileInputStream(new File("C:\\Users\\BRIJESH RAJPUT\\Downloads\\download.png"));
+		
+		MockMultipartFile mockfilein = new MockMultipartFile("image[]", "abcd.jpg", "multipart/form-data",filein);
+		when(userservice.getUserAddress(user.getUserID())).thenReturn(addlist);
+		when(userservice.getUserDetails(user.getUserID())).thenReturn(user);
+		mockMvc.perform(multipart("/editServlet").file(mockfilein)
+				.flashAttr("user", user)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+		.param("addressid", ""))
+		.andExpect(redirectedUrl("userData"));
+	}
+	@Test
+	void testEdit4() throws Exception {
+		FileInputStream filein = new FileInputStream(new File("C:\\Users\\BRIJESH RAJPUT\\Downloads\\download.png"));
+		
+		MockMultipartFile mockfilein = new MockMultipartFile("image[]", "abcd.jpg", "multipart/form-data",filein);
+		when(userservice.getUserAddress(user.getUserID())).thenReturn(addlist);
+		when(userservice.getUserDetails(user.getUserID())).thenReturn(user);
+		mockMvc.perform(multipart("/editServlet").file(mockfilein)
+				.flashAttr("user", user)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+		.param("addressid", "0"))
+		.andExpect(redirectedUrl("userData"));
+	}
+	@Test
+	void testEdit5() throws Exception {
+		FileInputStream filein = new FileInputStream(new File("C:\\Users\\BRIJESH RAJPUT\\Downloads\\download.png"));
+		
+		MockMultipartFile mockfilein = new MockMultipartFile("image[]", "abcd.jpg", "multipart/form-data",filein);
+		user.setLastname("12344");
+		user.setPic(null);
+		when(userservice.getUserAddress(user.getUserID())).thenReturn(addlist);
+		when(userservice.getUserDetails(user.getUserID())).thenReturn(user);
+		mockMvc.perform(multipart("/editServlet").file(mockfilein)
+				.flashAttr("user", user)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.accept(MediaType.MULTIPART_FORM_DATA)
+		.param("addressid", "0"))
+		.andExpect(view().name("registration"));
+	}
+
+	@Test
+	void testUserData1() throws Exception {
+		mockMvc.perform(post("/userData")
+				.sessionAttr("USER", user))
+				.andExpect(redirectedUrl("adminWork"));
+	}
+	@Test
+	void testUserData2() throws Exception {
+		user.setRole("user");
+		mockMvc.perform(post("/userData")
+				.sessionAttr("USER", user))
+				.andExpect(redirectedUrl("userDashBoard"));
+	}
+
+	@Test
+	void testDeleteUserImage() throws Exception {
+		mockMvc.perform(post("/removeImage")
+				.param("imgId",String.valueOf("3"))
+				.param("userid",String.valueOf(user.getUserID())));
+	}
 
 }

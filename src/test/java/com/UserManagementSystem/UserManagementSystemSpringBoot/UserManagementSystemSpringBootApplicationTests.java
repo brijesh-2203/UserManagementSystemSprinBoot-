@@ -8,6 +8,7 @@ class UserManagementSystemSpringBootApplicationTests {
 
 	@Test
 	void contextLoads() {
+		UserManagementSystemSpringBootApplication.main(new String[] {});
 	}
 
 }

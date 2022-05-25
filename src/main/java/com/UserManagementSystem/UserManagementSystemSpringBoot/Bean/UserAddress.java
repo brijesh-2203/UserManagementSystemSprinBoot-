@@ -34,9 +34,9 @@ public class UserAddress implements Serializable {
 	@ManyToOne
 	private User user;
 	public UserAddress() {}
-	public User getUser() {
-		return user;
-	}
+//	public User getUser() {
+//		return user;
+//	}
 	public void setUser(User user) {
 		this.user = user;
 	}
@@ -83,10 +83,4 @@ public class UserAddress implements Serializable {
 		this.addressid = addressid;
 	}
 	
-	
-	@Override
-	public String toString() {
-		return "UserAddress [addressid=" + addressid + ", add1=" + add1 + ", add2=" + add2
-				+ ", city=" + city + ", state=" + state + ", country=" + country + ", pincode=" + pincode + "]";
-	}
 }

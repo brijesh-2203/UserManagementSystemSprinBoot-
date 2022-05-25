@@ -1,24 +1,19 @@
 package com.UserManagementSystem.UserManagementSystemSpringBoot.Service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.WritableRaster;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,9 +43,6 @@ class UserServiceImplTest {
 	@Mock
 	private UserImageDao userimagedao;
 
-	@Mock
-	private EncryptPwd encrypt;
-
 	private User user;
 
 	private UserAddress add;
@@ -70,7 +62,7 @@ class UserServiceImplTest {
 		user.setAnswer2("Hello");
 		user.setDateofbirth("22/03/2000");
 		user.setLanguage("English");
-		String pwd = encrypt.encryption("12345");
+		String pwd = EncryptPwd.encryption("12345");
 		user.setPassword(pwd);
 		user.setPhone(9898990074L);
 		user.setRole("user");
@@ -127,15 +119,6 @@ class UserServiceImplTest {
 		User usr = userservice.checkUser(user.getEmail());
 		assertNotNull(usr);
 	}
-//	@Test
-//	void testCheckUser2() {
-////		List<User> usrlist = new ArrayList<User>();
-////		usrlist.add(user);
-//		//when(userdao.findByEmail("a@gmail.com"));
-//		User usr = userservice.checkUser("abc@gmail.com");
-//		assertEquals(usr.getEmail(), user.getEmail());
-//		//assertNotNull(usr);
-//	}
 
 	@Test
 	void testChangePwd() {
@@ -182,9 +165,16 @@ class UserServiceImplTest {
 	}
 
 	@Test
-	void testDeleteAddress() {
+	void testDeleteAddress1() {
 		userservice.deleteAddress(add, user);
 		verify(useraddressdao, atLeastOnce()).delete(add);
+	}
+	@Test
+	void testDeleteAddress2() {
+		UserAddress newAdd = new UserAddress();
+		newAdd.setAddressid(1233);
+		userservice.deleteAddress(newAdd, user);
+		verify(useraddressdao, atLeastOnce()).delete(newAdd);
 	}
 
 	@Test

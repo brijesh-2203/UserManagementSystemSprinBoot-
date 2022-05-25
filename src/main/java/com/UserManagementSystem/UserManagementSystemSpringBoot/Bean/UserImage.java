@@ -30,15 +30,15 @@ public class UserImage implements Serializable{
 	private String base64Image;
 	@ManyToOne
 	private User user;
-	public User getUser() {
-		return user;
-	}
+//	public User getUser() {
+//		return user;
+//	}
 	public void setUser(User user) {
 		this.user = user;
 	}
-	public String getBase64Image() {
-		return base64Image;
-	}
+//	public String getBase64Image() {
+//		return base64Image;
+//	}
 	public void setBase64Image(String base64Image) {
 		this.base64Image = base64Image;
 	}
